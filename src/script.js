@@ -1,93 +1,61 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { Mesh } from 'three'
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
-import {TextGeometry} from 'three/examples/jsm/geometries/TextGeometry'
-import * as dat from 'dat.gui'
+import * as dat from 'lil-gui'
 
 /**
  * Base
  */
+// Debug
+const gui = new dat.GUI()
+
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
 
 // Scene
 const scene = new THREE.Scene()
 
-// //Axis helper
-// const axis = new THREE.AxesHelper()
-// scene.add(axis)
+/**
+ * Lights
+ */
+// Ambient light
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+gui.add(ambientLight, 'intensity').min(0).max(1).step(0.001)
+scene.add(ambientLight)
 
+// Directional light
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
+directionalLight.position.set(2, 2, - 1)
+gui.add(directionalLight, 'intensity').min(0).max(1).step(0.001)
+gui.add(directionalLight.position, 'x').min(- 5).max(5).step(0.001)
+gui.add(directionalLight.position, 'y').min(- 5).max(5).step(0.001)
+gui.add(directionalLight.position, 'z').min(- 5).max(5).step(0.001)
+scene.add(directionalLight)
 
 /**
- * Debug GUI
+ * Materials
  */
-const gui = new dat.GUI()
-// gui.hide()
+const material = new THREE.MeshStandardMaterial()
+material.roughness = 0.7
+gui.add(material, 'metalness').min(0).max(1).step(0.001)
+gui.add(material, 'roughness').min(0).max(1).step(0.001)
 
 /**
- * Texture
+ * Objects
  */
-const textureLoader = new THREE.TextureLoader()
-const matcapTexture = textureLoader.load('textures/matcaps/8.png')
-
-/**
- * Fonts
- */
-const fontLoader = new FontLoader()
-fontLoader.load(
-    'fonts/helvetiker_regular.typeface.json',
-    (font) => {
-        const textGeometry = new TextGeometry(
-            'Hello World',
-            {
-                font: font,
-                size: 0.5,
-                height: 0.2,
-                curveSegments: 5,
-                bevelEnabled: true,
-                bevelThickness: 0.03,
-                bevelSize: 0.02,
-                bevelOffset: 0,
-                bevelSegments: 4
-            }
-        )
-        // textGeometry.computeBoundingBox() //Bounding box surround object to help with fustrum culling (render objects only when it needed to)
-        // textGeometry.translate( //center object with bounding box in mind
-        //     - (textGeometry.boundingBox.max.x - 0.02) * 0.5,
-        //     - (textGeometry.boundingBox.max.y - 0.02) * 0.5,
-        //     - (textGeometry.boundingBox.max.z - 0.03) * 0.5
-        // )
-        textGeometry.center()
-
-        const textMaterial = new THREE.MeshMatcapMaterial()
-        textMaterial.matcap = matcapTexture
-        const text = new THREE.Mesh(textGeometry, textMaterial)
-        scene.add(text)
-
-        const donutGeometry = new THREE.TorusBufferGeometry(0.1, 0.05, 12, 24)
-        for (let i = 0; i < 150; i++) {
-            const donut = new THREE.Mesh(donutGeometry, textMaterial)
-            donut.position.x = (Math.random() - .5) * 10
-            donut.position.y = (Math.random() - .5) * 10
-            donut.position.z = (Math.random() - .5) * 10
-
-            donut.rotation.x = Math.random()
-            donut.rotation.y = Math.random() 
-
-            scene.add(donut)
-        }
-    }
+const sphere = new THREE.Mesh(
+    new THREE.SphereGeometry(0.5, 32, 32),
+    material
 )
 
-// const material = new THREE.MeshBasicMaterial({color: 0xffffff})
+const plane = new THREE.Mesh(
+    new THREE.PlaneGeometry(5, 5),
+    material
+)
+plane.rotation.x = - Math.PI * 0.5
+plane.position.y = - 0.5
 
-// const cube = new THREE.Mesh (
-//     new THREE.BoxBufferGeometry(1, 1, 1, 2, 2, 2),
-//     material
-// )
-// scene.add(cube)
+scene.add(sphere, plane)
 
 /**
  * Sizes
@@ -96,7 +64,6 @@ const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
 }
-
 
 window.addEventListener('resize', () =>
 {
