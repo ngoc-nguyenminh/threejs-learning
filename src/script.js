@@ -1,6 +1,8 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
+import {TextGeometry} from 'three/examples/jsm/geometries/TextGeometry'
 import * as dat from 'dat.gui'
 
 /**
@@ -8,6 +10,14 @@ import * as dat from 'dat.gui'
  */
 // Debug
 const gui = new dat.GUI()
+
+const parameters = {
+    materialColor: '#ffeded'
+}
+
+gui
+    .addColor(parameters, 'materialColor')
+
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
@@ -27,7 +37,7 @@ const ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
 // scene.add(ambientLight)
 
 const pointLight = new THREE.PointLight(0Xff9000, 1, 10)
-pointLight.position.x  = 1
+pointLight.position.x  = 100
 pointLight.position.y  = 2
 pointLight.position.z  = 3
 scene.add(pointLight)
@@ -37,7 +47,6 @@ const helper = new THREE.PointLightHelper(pointLight)
 // scene.add(helper)
 /**
  * net
- */
 const geometry = new THREE.BoxBufferGeometry(.5, .5, .5)
 
 const boxMaterial = new THREE.MeshStandardMaterial({
@@ -64,8 +73,38 @@ for (let i = 0; i <= 20; i++) {
         scene.add(col)
     }
 }
+*/
+const fontLoader = new FontLoader()
+fontLoader.load(
+    'fonts/helvetiker_regular.typeface.json',
+    (font) => {
+        const textGeometry = new TextGeometry(
+            'You Sucks',
+            {
+                font: font,
+                size: 0.5,
+                height: 0.2,
+                curveSegments: 5,
+                bevelEnabled: true,
+                bevelThickness: 0.03,
+                bevelSize: 0.02,
+                bevelOffset: 0,
+                bevelSegments: 4
+            }
+        )
+        // textGeometry.computeBoundingBox() //Bounding box surround object to help with fustrum culling (render objects only when it needed to)
+        // textGeometry.translate( //center object with bounding box in mind
+        //     - (textGeometry.boundingBox.max.x - 0.02) * 0.5,
+        //     - (textGeometry.boundingBox.max.y - 0.02) * 0.5,
+        //     - (textGeometry.boundingBox.max.z - 0.03) * 0.5
+        // )
+        textGeometry.center()
 
-
+        const textMaterial = new THREE.MeshStandardMaterial()
+        const text = new THREE.Mesh(textGeometry, textMaterial)
+        scene.add(text)
+    }
+)
 
 /**
  * Sizes
@@ -104,7 +143,7 @@ const mouse = new THREE.Vector2()
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(2, 15, 20)
+camera.position.set(-2, 1, 3)
 camera.lookAt(new THREE.Vector3(0,0,0))
 scene.add(camera)
 
