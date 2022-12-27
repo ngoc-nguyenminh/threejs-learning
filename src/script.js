@@ -5,7 +5,8 @@ import * as dat from 'dat.gui'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import * as CANNON from 'cannon-es'
-import { MeshStandardMaterial } from 'three'
+import { ACESFilmicToneMapping, MeshStandardMaterial, NoToneMapping, sRGBEncoding } from 'three'
+import { Sphere } from 'cannon-es'
 
 
 /**
@@ -13,6 +14,7 @@ import { MeshStandardMaterial } from 'three'
  */
 // Debug
 const gui = new dat.GUI()
+const debugObjects = {}
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
@@ -20,73 +22,79 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 
+//Loaders
+const gltfLoader = new GLTFLoader()
+const cubeTextureLoader = new THREE.CubeTextureLoader()
+
+const environmentMap = cubeTextureLoader.load([
+  'textures/environmentMaps/2/px.png',
+  'textures/environmentMaps/2/nx.png',
+  'textures/environmentMaps/2/py.png',
+  'textures/environmentMaps/2/ny.png',
+  'textures/environmentMaps/2/pz.png',
+  'textures/environmentMaps/2/nz.png',
+])
+environmentMap.encoding = THREE.sRGBEncoding
+scene.background = environmentMap
+scene.environment = environmentMap
+
+const updateAllMaterial = () => {
+  scene.traverse((child) => {
+    if(child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+      // child.material.envMap = environmentMap
+      child.material.envMapIntensity = debugObjects.envMapIntensity
+      child.castShadow = true
+      child.receiveShadow = true
+      child.material.needsUpdate = true
+    }
+  })
+}
+
+gltfLoader.load(
+  // '/models/FlightHelmet/glTF/FlightHelmet.gltf',
+  '/models/hamburger.glb',
+  (gltf) => {
+    scene.add(gltf.scene)
+    gltf.scene.scale.set(5, 5, 5)
+    gltf.scene.position.set(0, -1, 0)
+    // gltf.scene.position.set(0, -2, 0)
+    gltf.scene.scale.set(0.3, 0.3, 0.3)
+    gui.add(gltf.scene.rotation, 'y').min(-Math.PI).max(Math.PI).step(0.001).name('rotation')
+    updateAllMaterial()
+  }
+)
+
+
+debugObjects.envMapIntensity = 5
+gui.add(debugObjects, 'envMapIntensity').min(0).max(10).step(0.001).onChange(updateAllMaterial)
+
 /**
  * Models
  */
-const dracoLoader = new DRACOLoader()
-dracoLoader.setDecoderPath('/draco/') //Add Draco work in another thread
-//DRACO Loader is not always optimize, cos it always load the compressor and decompressor classes, so use it when the model is complex and fairy big, anw, the model still freeze if too heavy
-
-
-const gltfLoader = new GLTFLoader()
-gltfLoader.setDRACOLoader(dracoLoader)
-
-let mixer = null
-gltfLoader.load(
-    'models/hamburger.glb',
-    (gltf) => {
-        // const children = [...gltf.scene.children]
-        // for (const child of children) {
-        //     scene.add(child)
-        //     child.scale.set(0.01, 0.01, 0.01)
-        // }
-        // mixer = new THREE.AnimationMixer(gltf.scene)
-        // const action = mixer.clipAction(gltf.animations[2])
-        
-        // action.play()
-
-        // gltf.scene.scale.set(0.03, 0.03, 0.03)
-        scene.add(gltf.scene)
-    },
-    () => {
-        console.log('process')
-    },
-    () => {
-        console.log('error')
-    }
-)
 
 /**
  * Floor
  */
-const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(10, 10),
-    new THREE.MeshStandardMaterial({
-        color: '#444444',
-        metalness: 0,
-        roughness: 0.5
-    })
-)
-floor.receiveShadow = true
-floor.rotation.x = - Math.PI * 0.5
-scene.add(floor)
 
 /**
  * Lights
  */
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
-scene.add(ambientLight)
-
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6)
-directionalLight.castShadow = true
-directionalLight.shadow.mapSize.set(1024, 1024)
+const directionalLight = new THREE.DirectionalLight(0xffffff, 5)
+directionalLight.position.set(0.25, 3, -2.25)
 directionalLight.shadow.camera.far = 15
-directionalLight.shadow.camera.left = - 7
-directionalLight.shadow.camera.top = 7
-directionalLight.shadow.camera.right = 7
-directionalLight.shadow.camera.bottom = - 7
-directionalLight.position.set(5, 5, 5)
+directionalLight.shadow.mapSize.set(1024, 1024)
+directionalLight.castShadow = true
+directionalLight.shadow.normalBias = 0.00001 // Remove the weird grid-like shadows on the material (shadow acne)
 scene.add(directionalLight)
+
+// const directionalLightCameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
+// scene.add(directionalLightCameraHelper)
+
+gui.add(directionalLight, 'intensity').min(0).max(10).step(0.001).name('Light Intensity')
+gui.add(directionalLight.position, 'x').min(-10).max(10).step(0.001).name('Light posX')
+gui.add(directionalLight.position, 'y').min(-10).max(10).step(0.001).name('Light posY')
+gui.add(directionalLight.position, 'z').min(-10).max(10).step(0.001).name('Light posZ')
+gui.add(directionalLight.shadow, 'normalBias').min(0).max(0.1).step(0.000001)
 
 /**
  * Sizes
@@ -121,19 +129,35 @@ scene.add(camera)
 
 // Controls
 const controls = new OrbitControls(camera, canvas)
-controls.target.set(0, 0.75, 0)
+// controls.target.set(0, 0.75, 0)
 controls.enableDamping = true
 
 /**
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+    canvas: canvas,
+    antialias: true //remove staircase effect
 })
-renderer.shadowMap.enabled = true
-renderer.shadowMap.type = THREE.PCFSoftShadowMap
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+renderer.physicallyCorrectLights = true
+renderer.outputEncoding = THREE.sRGBEncoding
+renderer.toneMapping = THREE.ReinhardToneMapping
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
+
+gui.add(renderer, 'toneMapping', { //Read more about tone mapping, which involve dynamic range
+  No: THREE.NoToneMapping,
+  ACESFilmic: THREE.ACESFilmicToneMapping,
+  Linear: THREE.LinearToneMapping,
+  Reinhard: THREE.ReinhardToneMapping,
+  Cineon: THREE.CineonToneMapping
+})
+.onFinishChange(() => {
+  renderer.toneMapping = Number(renderer.toneMapping)
+  updateAllMaterial()
+})
 
 /**
  * Animate
@@ -146,11 +170,6 @@ const tick = () =>
     const elapsedTime = clock.getElapsedTime()
     const deltaTime = elapsedTime - previousTime
     previousTime = elapsedTime
-
-    //Update mixer
-    if(mixer){
-        mixer.update(deltaTime)
-    }
 
     // Update controls
     controls.update()
