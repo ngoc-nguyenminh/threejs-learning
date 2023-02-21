@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import Experience from "../Experience";
 
+
 export default class Environment {
     constructor() {
         this.experience = new Experience()
@@ -13,7 +14,7 @@ export default class Environment {
 
     setSunLight() {
         this.sunLight = new THREE.DirectionalLight(0xffffff, 5)
-        this.sunLight.position.set(0.25, 3, -2.25)
+        this.sunLight.position.set(2.25, 3, -2.25)
         this.sunLight.shadow.camera.far = 15
         this.sunLight.shadow.mapSize.set(1024, 1024)
         this.sunLight.castShadow = true
@@ -25,7 +26,7 @@ export default class Environment {
         this.environmentMap = {}
         this.environmentMap.intensity = 0.4
         this.environmentMap.texture = this.resources.items.environmentMapTexture
-        // this.environmentMap.texture.encoding = THREE.sRGBEncoding
+        this.environmentMap.texture.encoding = THREE.sRGBEncoding
 
         this.scene.environment = this.environmentMap.texture
 
