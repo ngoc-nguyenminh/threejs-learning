@@ -16,11 +16,17 @@ export default class Fox {
     setModel() {
         this.model = this.resource.scene
         this.model.scale.set(0.02, 0.02, 0.02)
-        
+
         this.scene.add(this.model)
         this.model.traverse((child) => {
             if(child instanceof THREE.Mesh) {
                 child.castShadow = true
+                // child. material = new THREE.MeshStandardMaterial({
+                //     wireframe: true,
+                //     // color: 'red'
+                // })
+                // child.material.wireframe =  true
+                // child.color = '#b2b6b1'
             }
         })
     }
@@ -28,7 +34,7 @@ export default class Fox {
     setAnimation() {
         this.animation = {}
         this.animation.mixer = new THREE.AnimationMixer(this.model)
-        this.animation.action = this.animation.mixer.clipAction(this.resource.animations[0])
+        this.animation.action = this.animation.mixer.clipAction(this.resource.animations[1])
         this.animation.action.play()
     }
 

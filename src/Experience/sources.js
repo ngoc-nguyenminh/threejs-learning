@@ -26,5 +26,10 @@ export default [
         name: 'foxModel',
         type: 'gltfModel',
         path: 'models/Fox/glTF/Fox.gltf'
+    }, 
+    {
+        name: 'flagColorTexture',
+        type: 'texture',
+        path: 'textures/flag.png'
     }
 ]

@@ -12,7 +12,7 @@ export default class  World {
 
         //Waiting for resource
         this.resource.on('ready', () => {
-            this.fox = new Fox()
+            // this.fox = new Fox()
             this.floor = new Floor()
             this.environment = new Environment()
         })
@@ -21,6 +21,10 @@ export default class  World {
     update() {
         if(this.fox) {
             this.fox.update()
+        }
+
+        if(this.floor) {
+            this.floor.update()
         }
     }
     // setEnvironmentMap() {
