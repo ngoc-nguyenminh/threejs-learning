@@ -9,6 +9,7 @@ export default class Floor {
         this.scene = this.experience.scene
         this.resource = this.experience.resources
         this.time = this.experience.time
+        this.debug = this.experience.debugger
         
         this.setGeometry()
         this.setTexture()
@@ -29,7 +30,7 @@ export default class Floor {
     }
 
     setMaterial() {
-        this.material = new THREE.RawShaderMaterial({
+        this.material = new THREE.ShaderMaterial({
             vertexShader: testVertexShader,
             fragmentShader: testFragmentShader,
             uniforms: {
@@ -41,8 +42,10 @@ export default class Floor {
             map: this.textures.color ,
             // wireframe: true
         })
-        this.experience.debugger.gui.add(this.material.uniforms.uFrequency.value, 'x').max(20).min(0).step(0.001)
-        this.experience.debugger.gui.add(this.material.uniforms.uFrequency.value, 'y').max(20).min(0).step(0.001)
+        if(this.debug.active) {
+            this.debug.gui.add(this.material.uniforms.uFrequency.value, 'x').max(20).min(0).step(0.001)
+            this.debug.gui.add(this.material.uniforms.uFrequency.value, 'y').max(20).min(0).step(0.001)
+        }
     }
 
     setTexture() {

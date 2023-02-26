@@ -1,11 +1,11 @@
-uniform mat4 projectionMatrix; // Transforms coordinate into clip space coordinate
-uniform mat4 viewMatrix; // Transforms camera (position, rotation, near, far, fov)
-uniform mat4 modelMatrix; // Transforms mesh (position, rotation, scale)
+// uniform mat4 projectionMatrix; // Transforms coordinate into clip space coordinate
+// uniform mat4 viewMatrix; // Transforms camera (position, rotation, near, far, fov)
+// uniform mat4 modelMatrix; // Transforms mesh (position, rotation, scale)
 uniform vec2 uFrequency;
 uniform float uTime;
 
-attribute vec3 position;
-attribute vec2 uv;
+// attribute vec3 position;
+// attribute vec2 uv;
 // attribute float aRandom; //add 'a' to attribute, 'v' for varying
 
 varying vec2 vUv;

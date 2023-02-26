@@ -6,7 +6,7 @@ import Renderer from './Renderer.js'
 import World from './World/World.js'
 import Resources from './Utils/Resources.js'
 import sources from './sources.js'
-import Debugger from './Debug/Debugger.js'
+import Debugger from './Utils/Debugger.js'
 
 //We will construct this class as a singleton
 //What is singleton class? It's a class that creates only one object, so whenever it's constructor is call, it will return the existed object (if already existed) 
@@ -24,11 +24,11 @@ export default class Experience
         // Setup
         window.experience = this
         this.canvas = canvas
+        this.debugger = new Debugger()
         this.sizes = new Sizes()
         this.time = new Time()
         this.resources = new Resources(sources)
         this.scene = new THREE.Scene()
-        this.debugger = new Debugger()
         this.camera = new Camera()
         this.renderer = new Renderer()
         this.world = new World()
