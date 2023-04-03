@@ -43,7 +43,7 @@ export default class Floor {
             // wireframe: true
         })
         if(this.debug.active) {
-            this.debug.gui.add(this.material.uniforms.uFrequency.value, 'x').max(20).min(0).step(0.001)
+            // this.debug.gui.add(this.geometry.position.value, 'x').max(20).min(0).step(0.001)
             this.debug.gui.add(this.material.uniforms.uFrequency.value, 'y').max(20).min(0).step(0.001)
         }
     }
